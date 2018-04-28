@@ -775,9 +775,10 @@ def install(version, path, config, selected, installs):
     if not version in installs and not 'Unity' in selected:
             error('Installing only components but no matching Unity %s installation found' % version)
     
-    install_path = os.path.join(args.volume, 'Applications', 'Unity')
+    install_path = os.path.join(args.volume, 'Applications', 'Unity%s' % version)
     
-    moved_unity_to = None
+    moved_unity_to = os.path.join(args.volume, 'Applications', 'Unity')
+    """
     if version in installs and os.path.basename(installs[version]) == 'Unity':
         # The 'Unity' folder already contains the target version
         pass
@@ -787,7 +788,7 @@ def install(version, path, config, selected, installs):
         if len(lookup) != 1:
             error('Directory "%s" not recognized as Unity installation.' % install_path)
         
-        moved_unity_to = os.path.join(args.volume, 'Applications', 'Unity %s' % lookup[0])
+        moved_unity_to = os.path.join(args.volume, 'Applications', 'Unity%s' % lookup[0])
         if os.path.isdir(moved_unity_to):
             error('Duplicate Unity installs in "%s" and "%s"' % (install_path, moved_unity_to))
         
@@ -798,6 +799,7 @@ def install(version, path, config, selected, installs):
     if version in installs and os.path.basename(installs[version]) != 'Unity':
         moved_unity_from = installs[version]
         os.rename(moved_unity_from, install_path)
+    """
     
     install_error = None
     for pkg in selected:
@@ -821,18 +823,19 @@ def install(version, path, config, selected, installs):
             install_error = (filename, result[0])
             break
     
+    """
     # Revert moving around Unity installations
     if moved_unity_from:
         os.rename(install_path, moved_unity_from)
-    
+    """
     if moved_unity_to:
         if os.path.isdir(install_path):
             # If there previously was a 'Unity' folder, move the newly
             # installed Unity to 'Unity VERSION'
-            new_install_path = os.path.join(args.volume, 'Applications', 'Unity %s' % version)
+            new_install_path = os.path.join(args.volume, 'Applications', 'Unity%s' % version)
             os.rename(install_path, new_install_path)
         os.rename(moved_unity_to, install_path)
-    
+
     if install_error:
         error('Installation of package "%s" failed: %s' % install_error)
     
@@ -872,7 +875,7 @@ data_path = os.path.abspath(os.path.expanduser(args.data_dir))
 cache = version_cache(os.path.join(data_path, CACHE_FILE))
 settings = script_settings(os.path.join(data_path, SETTINGS_FILE))
 pwd = None
-is_root = (os.getuid() == 0)
+is_root = True # (os.getuid() == 0)
 
 def main():
     print 'Install Unity Script %s' % VERSION
